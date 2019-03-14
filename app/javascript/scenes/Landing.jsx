@@ -3,12 +3,20 @@ import React from 'react';
 export default class Landing extends React.Component {
   state = {
     linkInput: '',
-    imageUrl: '',
+    images: [],
   };
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.onSubmit = this.onSubmit.bind(this);
+  }
+
+  async componentDidMount() {
+    const res = await fetch('/images');
+    if(res.ok) {
+      const body = await res.json();
+      this.setState({images: body})
+    }
   }
 
   onChange = (e) => {
@@ -19,11 +27,11 @@ export default class Landing extends React.Component {
     const {linkInput} = this.state;
     e.preventDefault();
 
-    const success = await this.postImage(linkInput);
-    if (success) {
+    const newImage = await this.postImage(linkInput);
+    if (newImage && newImage.id) {
       this.setState({
-        imageUrl: linkInput,
         linkInput: '',
+        images: [newImage, ...this.state.images]
       });
     }
   }
@@ -38,17 +46,21 @@ export default class Landing extends React.Component {
         'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content
       }
     });
-    if(res.ok) {
-      const body = await res.json();
-      console.log(body);
-
-      return body.id;
+    if (res.ok) {
+      return await res.json();
     }
     return false;
   }
 
+  renderImages() {
+    const {images} = this.state;
+    return images.map((item, index) => (
+      <img className='landing-img' key={index} src={item.url} />
+    ));
+  }
+
   render() {
-    const {imageUrl, linkInput} = this.state;
+    const {linkInput} = this.state;
     return (
       <div>
         <h2>Image Sharer</h2>
@@ -62,7 +74,7 @@ export default class Landing extends React.Component {
         <div>
           Try: https://upload.wikimedia.org/wikipedia/commons/e/e2/Yosemite_El_Capitan.jpg
         </div>
-       {imageUrl && <img className='landing-img' src={imageUrl} />}
+        {this.renderImages()}
       </div>
     );
   }
