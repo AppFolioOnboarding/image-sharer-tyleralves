@@ -1,15 +1,12 @@
 import React from 'react';
+import {Modal, ModalBody, ModalFooter, ModalHeader} from 'reactstrap';
 
 export default class Landing extends React.Component {
   state = {
     linkInput: '',
     images: [],
+    isModalOpen: false
   };
-
-  constructor(props) {
-    super(props);
-    this.onSubmit = this.onSubmit.bind(this);
-  }
 
   async componentDidMount() {
     const res = await fetch('/images');
@@ -23,7 +20,7 @@ export default class Landing extends React.Component {
     this.setState({linkInput: e.target.value});
   }
 
-  async onSubmit(e) {
+  onSubmit = async (e) => {
     const {linkInput} = this.state;
     e.preventDefault();
 
@@ -36,7 +33,7 @@ export default class Landing extends React.Component {
     }
   }
 
-  async postImage(linkInput) {
+  postImage = async (linkInput) => {
     const res = await fetch('/images', {
       method: 'POST',
       body: JSON.stringify({url: linkInput}),
@@ -52,6 +49,10 @@ export default class Landing extends React.Component {
     return false;
   }
 
+  onModalToggle = () => {
+    this.setState({isModalOpen: !this.state.isModalOpen});
+  }
+
   renderImages() {
     const {images} = this.state;
     return images.map((item, index) => (
@@ -59,20 +60,38 @@ export default class Landing extends React.Component {
     ));
   }
 
+  renderModal() {
+    const {isModalOpen, linkInput} = this.state;
+    return (
+      <Modal isOpen={isModalOpen} toggle={this.onModalToggle}>
+        <ModalHeader toggle={this.onModalToggle}>
+          Upload Image
+        </ModalHeader>
+        <ModalBody>
+          <form onSubmit={this.onSubmit}>
+            <div>
+              <label htmlFor="linkInput">Image Url:</label>
+            </div>
+            <input id="linkInput" onChange={this.onChange} type='url' value={linkInput}/>
+            <button type='submit' disabled={!linkInput}>Submit</button>
+          </form>
+        </ModalBody>
+        <ModalFooter>
+          <div>
+            Try: http://tinyurl.com/y2cfdjpr
+          </div>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+
   render() {
-    const {linkInput} = this.state;
     return (
       <div>
+        {this.renderModal()}
         <h2>Image Sharer</h2>
-        <form onSubmit={this.onSubmit}>
-          <div>
-            <label htmlFor="linkInput">Image Url:</label>
-          </div>
-          <input id="linkInput" onChange={this.onChange} type='url' value={linkInput}/>
-          <button type='submit' disabled={!linkInput}>Submit</button>
-        </form>
         <div>
-          Try: https://upload.wikimedia.org/wikipedia/commons/e/e2/Yosemite_El_Capitan.jpg
+          <button onClick={this.onModalToggle}>Upload Image</button>
         </div>
         {this.renderImages()}
       </div>
