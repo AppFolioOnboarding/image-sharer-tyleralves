@@ -6,17 +6,45 @@ export default class Landing extends React.Component {
     imageUrl: '',
   };
 
+  constructor() {
+    super();
+    this.onSubmit = this.onSubmit.bind(this);
+  }
+
   onChange = (e) => {
     this.setState({linkInput: e.target.value});
   }
 
-  onSubmit = (e) => {
+  async onSubmit(e) {
     const {linkInput} = this.state;
     e.preventDefault();
-    this.setState({
-      imageUrl: linkInput,
-      linkInput: '',
+
+    const success = await this.postImage(linkInput);
+    if (success) {
+      this.setState({
+        imageUrl: linkInput,
+        linkInput: '',
+      });
+    }
+  }
+
+  async postImage(linkInput) {
+    const res = await fetch('/images', {
+      method: 'POST',
+      body: JSON.stringify({url: linkInput}),
+      credentials: 'same-origin',
+      headers: {
+        "Content-Type": "application/json",
+        'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content
+      }
     });
+    if(res.ok) {
+      const body = await res.json();
+      console.log(body);
+
+      return body.id;
+    }
+    return false;
   }
 
   render() {
@@ -28,13 +56,13 @@ export default class Landing extends React.Component {
           <div>
             <label htmlFor="linkInput">Image Url:</label>
           </div>
-          <input id="linkInput" onChange={this.onChange} value={linkInput}/>
-          <button type='submit'>Submit</button>
+          <input id="linkInput" onChange={this.onChange} type='url' value={linkInput}/>
+          <button type='submit' disabled={!linkInput}>Submit</button>
         </form>
         <div>
           Try: https://upload.wikimedia.org/wikipedia/commons/e/e2/Yosemite_El_Capitan.jpg
         </div>
-        <img className='landing-img' src={imageUrl} />
+       {imageUrl && <img className='landing-img' src={imageUrl} />}
       </div>
     );
   }

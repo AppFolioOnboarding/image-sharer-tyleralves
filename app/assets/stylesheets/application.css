@@ -13,3 +13,6 @@
  *= require_tree .
  *= require_self
  */
+.landing-img {
+  width: 250px;
+}

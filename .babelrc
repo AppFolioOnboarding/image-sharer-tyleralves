@@ -9,11 +9,17 @@
           "uglify": true,
           "node": "current",
         },
-        "useBuiltIns": "usage"
+        "useBuiltIns": "usage",
+        "forceAllTransforms": true
       }
     ],
     "@babel/preset-react"
   ],
+  "env": {
+    "test": {
+      "plugins": ["transform-es2015-modules-commonjs"]
+    }
+  },
   "plugins": [
     "@babel/syntax-dynamic-import",
     "@babel/plugin-proposal-object-rest-spread",
