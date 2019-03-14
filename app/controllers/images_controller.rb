@@ -9,6 +9,11 @@ class ImagesController < ApplicationController
     end
   end
 
+  def show
+    @images = Image.order(created_at: :desc)
+    render json: @images
+  end
+
   private
 
   def image_params
