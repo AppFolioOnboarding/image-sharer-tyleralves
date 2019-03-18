@@ -14,5 +14,9 @@
  *= require_self
  */
 .landing-img {
-  width: 400px;
+  max-width: 400px;
+}
+
+.modal-footer {
+  justify-content: flex-start;
 }
